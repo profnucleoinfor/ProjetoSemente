@@ -1,0 +1,165 @@
+/*==============================================================
+PROJETO SEMENTE
+RESPONSIVE.CSS — v1.1
+==============================================================*/
+
+@media (max-width: 992px) {
+    #menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--primary);
+        padding: var(--space-md) 0;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-20px);
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition-medium);
+    }
+
+    #menu.aberto {
+        display: block;
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    #menu.aberto ul {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-md);
+    }
+
+    #menu.aberto a {
+        color: var(--white);
+    }
+
+    #header.active #menu.aberto {
+        background: rgb(255 255 255 / 0.98);
+    }
+
+    #header.active #menu.aberto a {
+        color: var(--primary);
+    }
+
+    #btn-menu {
+        display: block;
+    }
+
+    .hero h1 {
+        font-size: 3.2rem;
+    }
+
+    .sobre-grid,
+    .contato-grid,
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-xl);
+    }
+
+    .cards-mvv,
+    .oficinas-grid,
+    .numeros-grid,
+    .logos-parceiros {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .galeria-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .foto, 
+    .foto.alta {
+        height: 250px;
+        grid-row: span 1;
+    }
+
+    .footer-grid {
+        text-align: center;
+    }
+
+    .redes {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: min(100%, 90%);
+    }
+
+    #header {
+        padding: var(--space-xs) 0;
+    }
+
+    .logo img {
+        height: 60px;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero p {
+        font-size: 1.1rem;
+    }
+
+    .titulo-central h2 {
+        font-size: 1.8rem;
+    }
+
+    .cards-mvv,
+    .oficinas-grid,
+    .numeros-grid,
+    .logos-parceiros,
+    .galeria-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .foto, 
+    .foto.alta {
+        height: 280px;
+    }
+
+    .numero-card h3 {
+        font-size: 42px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn,
+    .btn-outline {
+        width: 100%;
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .titulo-central span {
+        font-size: 0.875rem;
+    }
+
+    .card-oficina,
+    .card-mvv,
+    .numero-card {
+        padding: var(--space-md);
+    }
+
+    .sobre,
+    .mvv,
+    .oficinas,
+    .galeria,
+    .parceiros,
+    .contato {
+        padding: var(--space-2xl) 0;
+    }
+}
