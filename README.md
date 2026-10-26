@@ -1,59 +1,129 @@
 # Projeto Semente
 
-## Fase 2 – Estrutura e banco de dados
+## Visão geral
 
-Esta etapa cria a base técnica da aplicação antes da implementação das telas e do painel administrativo.
+Aplicação web institucional em PHP 8 com renderização no servidor, banco MySQL e estrutura simples, segura e compatível com XAMPP e HostGator cPanel.
 
-### Estrutura inicial criada
+## Estrutura de diretórios
 
-- `App/Config/config.example.php`: modelo de configuração para ambientes locais e produção.
-- `App/Config/config.php`: configuração local do ambiente atual.
-- `App/Core/Database.php`: conexão PDO com tratamento de erros e validação rápida.
-- `database/schema.sql`: criação do banco e das tabelas do sistema.
-- `database/schema-doc.md`: documentação do esquema e relacionamentos.
-- `.gitignore`: exclusão de arquivos sensíveis e temporários.
-- `.htaccess`: bloqueio básico de acesso direto a diretórios sensíveis.
-
-### Como executar localmente
-
-1. Instale o XAMPP e inicie Apache e MySQL.
-2. Acesse o phpMyAdmin ou o cliente MySQL.
-3. Crie o banco `projeto_semente`.
-4. Importe o arquivo `database/schema.sql`.
-5. Ajuste o arquivo `App/Config/config.php` com as credenciais do ambiente local.
-6. Verifique a conexão usando a classe `App\Core\Database`.
-
-### Configuração do arquivo de ambiente
-
-O projeto usa um arquivo de configuração separado para evitar segredos no repositório.
-
-Modelo:
-
-```php
-<?php
-return [
-    'database' => [
-        'host' => '127.0.0.1',
-        'port' => 3306,
-        'name' => 'projeto_semente',
-        'user' => 'root',
-        'password' => '',
-        'charset' => 'utf8mb4',
-    ],
-];
+```text
+projeto-semente/
+├── App/
+│   ├── Config/
+│   │   ├── config.example.php
+│   │   └── config.php
+│   ├── Core/
+│   │   ├── Auth.php
+│   │   ├── Csrf.php
+│   │   ├── Database.php
+│   │   └── Validator.php
+├── admin/
+│   ├── index.php
+│   ├── menu.php
+│   ├── alunos.php
+│   ├── oficinas.php
+│   ├── frequencia.php
+│   ├── relatorios.php
+│   ├── exportar-frequencia.php
+│   ├── conteudo.php
+│   ├── mensagens.php
+│   └── usuarios.php
+├── assets/
+│   ├── css/
+│   ├── js/
+│   └── img/
+├── database/
+│   ├── schema.sql
+│   ├── schema-doc.md
+│   └── seed_admin.sql
+├── includes/
+│   ├── functions.php
+│   ├── header.php
+│   └── footer.php
+├── .gitignore
+├── .htaccess
+├── contato.php
+├── galeria.php
+├── index.php
+├── instalar.php
+├── login.php
+├── logout.php
+├── oficinas.php
+├── parceiros.php
+├── quem-somos.php
+├── README.md
+├── LICENSE
+└── index.html
 ```
 
-### Considerações de segurança
+## Requisitos de ambiente
 
-- `config.php` deve permanecer fora do controle de versão em produção.
-- O diretório `storage/` e arquivos sensíveis devem ser protegidos por `.htaccess` ou pela estrutura fora da raiz pública.
-- O uso de `PDO` e prepared statements será obrigatório nas operações subsequentes.
+- PHP 8.2+
+- Apache + MySQL/MariaDB via XAMPP
+- PDO habilitado
+- `mbstring`, `openssl` e `session`
+- acesso ao diretório público do site
 
-### Limitações conhecidas
+## Configuração local
 
-- Esta fase cria a base técnica e a estrutura do banco, mas não executa a autenticação nem as telas do sistema.
-- A validação funcional completa depende do ambiente de execução com PHP e MySQL disponíveis.
+1. Inicie Apache e MySQL no XAMPP.
+2. Crie o banco `projeto_semente`.
+3. Importe o arquivo `database/schema.sql`.
+4. Copie `App/Config/config.example.php` para `App/Config/config.php`.
+5. Ajuste credenciais locais.
+6. Acesse `http://localhost/projetosemente/login.php`.
+7. Crie o primeiro administrador via `instalar.php`.
 
-### Critério da fase
+## Primeiro administrador
 
-Concluído para a estrutura inicial: banco importável, arquivo de configuração e conexão PDO preparados para a próxima fase de segurança e autenticação.
+O processo de criação do primeiro usuário administrador é controlado e bloqueado quando já existe algum usuário cadastrado.
+
+## Segurança
+
+- uso de PDO com prepared statements
+- sessões com cookie HttpOnly e SameSite
+- validação CSRF em formulários com alterações
+- `password_hash()` e `password_verify()`
+- controle de acesso por perfil
+- diretórios sensíveis protegidos por `.htaccess`
+- exportação CSV com proteção contra `=`, `+`, `-`, `@` e caracteres de controle
+
+## Permissões por perfil
+
+- `admin`: acesso total ao painel e à gestão de usuários
+- `professor`: acesso ao painel, alunos, oficinas, frequência e relatórios
+
+## Testes executados
+
+- verificação de estrutura de arquivos
+- conferência da integração dos módulos principais
+- análise dos fluxos de autenticação e proteção de dados
+- revisão de formulários e exportação CSV
+
+## Limitações conhecidas
+
+- não foi possível executar testes de runtime em PHP/MySQL neste ambiente, pois o serviço não está disponível para validação direta
+- imagens institucionais e conteúdo real precisam ser adicionados pela equipe quando disponibilizados
+- o processo de implantação em produção depende da configuração real do cPanel e do domínio
+
+## Backup e restauração
+
+1. Faça dump do banco com `mysqldump`.
+2. Faça cópia dos arquivos do projeto.
+3. Archive `App/Config/config.php` e `storage/` com cuidado.
+4. Restaure em ambiente adequado e revalidar credenciais.
+
+## Implantação em HostGator cPanel
+
+1. Verifique versão do PHP e extensões.
+2. Crie banco e usuário MySQL.
+3. Importe `database/schema.sql`.
+4. Ajuste `App/Config/config.php` para produção.
+5. Publicar os arquivos no diretório público.
+6. Configurar HTTPS e proteger diretórios sensíveis.
+7. Criar primeiro administrador via `instalar.php`.
+8. Remover/ocultar instaladores e arquivos temporários.
+
+## Observações finais
+
+O projeto implementa a base funcional exigida para a entrega institucional, com foco em segurança, manutenção e compatibilidade com XAMPP e cPanel.
