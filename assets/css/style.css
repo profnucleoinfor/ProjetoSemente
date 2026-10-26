@@ -1,117 +1,60 @@
 <?php
-require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/App/Core/Database.php';
-require_once __DIR__ . '/App/Core/Csrf.php';
-require_once __DIR__ . '/App/Core/Validator.php';
+require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../App/Core/Database.php';
 
-use App\Core\Csrf;
 use App\Core\Database;
-use App\Core\Validator;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    Csrf::requirePost();
-
-    if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-        setFlash('error', 'Token de segurança inválido. Tente novamente.');
-        redirect('/contato.php');
-    }
-
-    $name = trim((string) ($_POST['name'] ?? ''));
-    $email = strtolower(trim((string) ($_POST['email'] ?? '')));
-    $subject = trim((string) ($_POST['subject'] ?? ''));
-    $message = trim((string) ($_POST['message'] ?? ''));
-
-    $errors = [];
-
-    if (!Validator::required($name) || !Validator::lengthBetween($name, 2, 180)) {
-        $errors[] = 'Informe um nome válido.';
-    }
-
-    if (!Validator::email($email)) {
-        $errors[] = 'Informe um e-mail válido.';
-    }
-
-    if (!Validator::required($subject) || !Validator::lengthBetween($subject, 3, 200)) {
-        $errors[] = 'Informe um assunto válido.';
-    }
-
-    if (!Validator::required($message) || !Validator::lengthBetween($message, 10, 2000)) {
-        $errors[] = 'A mensagem deve conter entre 10 e 2000 caracteres.';
-    }
-
-    if ($errors) {
-        setFlash('error', implode(' ', $errors));
-        redirect('/contato.php');
-    }
-
-    try {
-        $db = Database::getConnection();
-        $stmt = $db->prepare(
-            'INSERT INTO contact_messages (sender_name, sender_email, subject, message, status) VALUES (:name, :email, :subject, :message, :status)'
-        );
-
-        $stmt->execute([
-            ':name' => $name,
-            ':email' => $email,
-            ':subject' => $subject,
-            ':message' => $message,
-            ':status' => 'new',
-        ]);
-
-        setFlash('success', 'Mensagem enviada com sucesso. Nossa equipe entrará em contato em breve.');
-        redirect('/contato.php');
-    } catch (Throwable $exception) {
-        error_log('[CONTACT] Falha ao gravar mensagem: ' . $exception->getMessage());
-        setFlash('error', 'Não foi possível enviar a mensagem no momento. Tente novamente mais tarde.');
-        redirect('/contato.php');
-    }
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-renderHeader('Contato | Projeto Semente');
+requireLogin();
+requireRole(['admin', 'professor']);
+
+$db = Database::getConnection();
+$workshops = $db->query("SELECT id, name FROM workshops WHERE status = 'active' ORDER BY name ASC")->fetchAll() ?: [];
+
+renderHeader('Relatórios | Projeto Semente');
 $flash = getFlash();
 if ($flash) {
     echo '<div class="alert ' . e($flash['type']) . '">' . e($flash['message']) . '</div>';
 }
 ?>
-
-<section class="section page-intro">
-    <div class="section-heading">
-        <span class="eyebrow">Contato</span>
-        <h1>Fale com o Projeto Semente</h1>
-    </div>
-</section>
-
-<section class="section">
-    <div class="contact-layout">
-        <div class="contact-card">
-            <h2>Enviar uma mensagem</h2>
-            <form method="post" action="/contato.php" novalidate>
-                <?php echo Csrf::field(); ?>
-                <div>
-                    <label for="name">Nome</label>
-                    <input id="name" name="name" type="text" maxlength="180" required>
-                </div>
-                <div>
-                    <label for="email">E-mail</label>
-                    <input id="email" name="email" type="email" maxlength="180" required>
-                </div>
-                <div>
-                    <label for="subject">Assunto</label>
-                    <input id="subject" name="subject" type="text" maxlength="200" required>
-                </div>
-                <div>
-                    <label for="message">Mensagem</label>
-                    <textarea id="message" name="message" rows="6" maxlength="2000" required></textarea>
-                </div>
-                <button class="btn primary" type="submit">Enviar mensagem</button>
-            </form>
+<div class="admin-shell">
+    <?php include __DIR__ . '/menu.php'; ?>
+    <main class="admin-main">
+        <div class="panel-header">
+            <div>
+                <span class="eyebrow">Relatórios</span>
+                <h1>Exportação de frequência</h1>
+            </div>
         </div>
-        <aside class="contact-info">
-            <h3>Informações</h3>
-            <p>O Projeto Semente fica em Santa Rita, Paraíba, e atua com ações de educação, cultura, esporte e cidadania.</p>
-            <p>As mensagens recebidas são armazenadas com segurança e somente tratadas pela equipe responsável.</p>
-        </aside>
-    </div>
-</section>
 
+        <section class="admin-card">
+            <h2>Exportar CSV</h2>
+            <form method="get" action="/admin/exportar-frequencia.php">
+                <div class="form-grid">
+                    <div>
+                        <label for="workshop_id">Oficina</label>
+                        <select id="workshop_id" name="workshop_id">
+                            <option value="">Todas</option>
+                            <?php foreach ($workshops as $workshop): ?>
+                                <option value="<?php echo e($workshop['id']); ?>"><?php echo e($workshop['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="start_date">Data inicial</label>
+                        <input id="start_date" name="start_date" type="date">
+                    </div>
+                    <div>
+                        <label for="end_date">Data final</label>
+                        <input id="end_date" name="end_date" type="date">
+                    </div>
+                </div>
+                <button type="submit" class="btn primary">Exportar CSV</button>
+            </form>
+        </section>
+    </main>
+</div>
 <?php renderFooter(); ?>
