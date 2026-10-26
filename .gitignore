@@ -1,0 +1,44 @@
+# Dependências de ambiente e arquivos gerados
+/.env
+/env.local
+/App/Config/config.php
+/App/Config/.env
+/storage/
+!storage/.gitkeep
+!storage/logs/.gitkeep
+!storage/exports/.gitkeep
+!storage/temp/.gitkeep
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.cache
+php_errors.log
+
+# Arquivos de sessão e uploads
+*.sess
+session/
+uploads/
+
+# Exportações e dados sensíveis
+/storage/exports/*
+/storage/logs/*
+/storage/temp/*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.gitignore.local
+
+# Arquivos de compilação e dependências locais
+/vendor/
+composer.lock
+
+# Banco local
+db_local.sql
